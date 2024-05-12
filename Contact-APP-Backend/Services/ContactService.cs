@@ -53,6 +53,7 @@ namespace Contact_APP_Backend.Services
             {
                 // Updating the contact properties with the values from the provided model
                 contact.Name = model.Name;
+                contact.Picture = model.Picture;
                 contact.Email = model.Email;
                 contact.Address = model.Address;
                 contact.City = model.City;

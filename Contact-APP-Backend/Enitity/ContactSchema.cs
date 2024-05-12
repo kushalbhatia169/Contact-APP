@@ -8,7 +8,10 @@
         public int Id { get; set; }
 
         // Property to represent the name of the contact
-        public string Name { get; set; } = string.Empty; 
+        public string Name { get; set; } = string.Empty;
+
+        // Property to represent the name of the contact
+        public string Picture { get; set; } = string.Empty;
 
         // Property to represent the email of the contact
         public string Email { get; set; } = string.Empty;
