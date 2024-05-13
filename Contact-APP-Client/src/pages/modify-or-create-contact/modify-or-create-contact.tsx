@@ -3,12 +3,14 @@ import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import TextField from '@mui/material/TextField/TextField';
-import { Button } from '@mui/material';
-import { red } from '@mui/material/colors';
-import { useCallback, useRef, useState } from 'react';
-import styles from "./creatingMemory.module.css";
+import { Box, Button, InputAdornment } from '@mui/material';
+import {useCallback, useRef, useState } from 'react';
+import styles from "./modify-or-create-contact.module.css";
 import axios from 'axios';
 import { convertBase64 } from '../../helpers/create-blob-from-file';
+import { useForm } from 'react-hook-form';
+import MuiPhoneNumber from 'mui-phone-number';
+import { Phone } from '@mui/icons-material';
 
 interface ModifyOrCreateContact {
   name: string,
@@ -32,23 +34,37 @@ const initialState = {
   phoneNumber: ""
 }
 
-export const CreatingMemoryCard = () => {
-  const [createOrUpdateContact, setCreateOrUpdateContact] = useState<ModifyOrCreateContact>(initialState);
-  const [isAnyFieldEmpty, setIsAnyFieldEmpty] = useState(false);
-  const [errorKey, setErrorKey] = useState<string[]>([]);
+export const ModifyOrCreateContact = () => {
+  const [createOrUpdateContact, setCreateOrUpdateContact] = useState<ModifyOrCreateContact>(initialState),
+    {register, handleSubmit, formState: { errors } } = useForm(),
+    [phoneError, setPhoneError] = useState(false),
+    [errorKey, setErrorKey] = useState<string[]>([]),
+    nameRef = useRef<HTMLInputElement>(null),
+    emailRef =  useRef<HTMLInputElement>(null),
+    addressRef =  useRef<HTMLInputElement>(null),
+    cityRef =  useRef<HTMLInputElement>(null),
+    countryRef =  useRef<HTMLInputElement>(null),
+    postalCodeRef =  useRef<HTMLInputElement>(null),
+    phoneNumberRef =  useRef<HTMLInputElement>(null),
+    phone_Number_Check = () => {
+      if (createOrUpdateContact.phoneNumber) {
+        if (createOrUpdateContact.phoneNumber.replace(/\D+/g, '').length < 10) {
+          setPhoneError(true);
+          return false;
+        }
+      }
+      if (!createOrUpdateContact.phoneNumber) {
+        setPhoneError(true);
+        return false;
+      }
 
-  const nameRef = useRef<HTMLInputElement>(null);
-  const emailRef =  useRef<HTMLInputElement>(null);
-  const addressRef =  useRef<HTMLInputElement>(null);
-  const cityRef =  useRef<HTMLInputElement>(null);
-  const countryRef =  useRef<HTMLInputElement>(null);
-  const postalCodeRef =  useRef<HTMLInputElement>(null);
-  const phoneNumberRef =  useRef<HTMLInputElement>(null);
+      setPhoneError(false);
+      return true;
+    },
+    hasValidEmail = (value: string ) => /\S+@\S+\.\S+/i.test(value?.toString());
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleOnChange = useCallback((keyVal: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if(keyVal === "phoneNumber" && createOrUpdateContact[keyVal]?.length < 10) {
-      return;
-    }
     if(e?.target.value) {
       setCreateOrUpdateContact({
         ...createOrUpdateContact,
@@ -63,14 +79,10 @@ export const CreatingMemoryCard = () => {
       });
 
       setErrorKey([...errorKey, keyVal]);
-
-      if(Object.values(createOrUpdateContact).some(value => value === '')) {
-        setIsAnyFieldEmpty(true);
-      }
     }
   },[createOrUpdateContact, errorKey]);
 
-  const handleSubmit = () => {
+  const onSubmit = () => {
     const fieldsToCheck = ["name", "email", "address", "city", "country", "postalCode", "phoneNumber"];
     let focusRef = null;
 
@@ -88,7 +100,6 @@ export const CreatingMemoryCard = () => {
 
     if (focusRef) {
       focusRef.current?.focus();
-      setIsAnyFieldEmpty(true);
     } else {
       axios.put("http://localhost:3000/posts/createPost", {
         title: createOrUpdateContact[fieldsToCheck[0] as keyof ModifyOrCreateContact],
@@ -109,10 +120,6 @@ export const CreatingMemoryCard = () => {
       });
     }
   };
-
-  const getErrorStatus = (getErrorStatus: string) => {
-    return errorKey.includes(getErrorStatus) ? true :false;
-  }
 
   const handleUploadFile = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     if(event.target.files) {
@@ -137,13 +144,12 @@ export const CreatingMemoryCard = () => {
   }
 
   return (
-    <Card sx={{ maxWidth: 500, maxHeight: 600, overflowX: "auto" }}>
+    <Card sx={{ maxWidth: 500, overflowX: "auto" }}>
       <CardHeader
         title="Create a Contact"
       />
-      {isAnyFieldEmpty && <span className="ms-3" style={{color: red[500]}}>*All fields Should have some value.</span>}
       <CardContent>
-        <form  onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <TextField 
             fullWidth
             id="outlined-basic"
@@ -151,11 +157,10 @@ export const CreatingMemoryCard = () => {
             variant="outlined"
             className="mt-2"
             value={createOrUpdateContact.name}
-            onChange={item => {
-              return handleOnChange("name", item);
-            }}
             inputRef={nameRef}
-            error={getErrorStatus("name")}
+            {...register("name", { onChange: item => handleOnChange("name", item), required: true, maxLength: 20, pattern: /^[0-9a-zA-Z]+$/i })}
+            error={Boolean(errors && errors.name)}
+            {...{inputProps:{maxLength:20}}}
           />
           <TextField 
             fullWidth
@@ -164,26 +169,20 @@ export const CreatingMemoryCard = () => {
             variant="outlined"
             className="mt-2"
             value={createOrUpdateContact.email}
-            onChange={item => {
-              return handleOnChange("email", item);
-            }}
+            {...register("email", { onChange: item => handleOnChange("email", item), required: true, maxLength: 50 ,  validate: hasValidEmail })}
             inputRef={emailRef}
-            error={getErrorStatus("email")}
+            error={Boolean(errors && errors.email)}
           />
           <TextField
             fullWidth
             id="outlined-basic"
             label="Address"
             variant="outlined"
-            multiline
-            rows={4}
             className="mt-2"
             value={createOrUpdateContact.address}
-            onChange={item => {
-              return handleOnChange("address", item);
-            }}
             inputRef={addressRef}
-            error={getErrorStatus("address")}
+            {...register("address",{ onChange: item => handleOnChange("address", item), required: true })}
+            error={Boolean(errors && errors.address)}
           />
           <TextField
             fullWidth
@@ -192,11 +191,9 @@ export const CreatingMemoryCard = () => {
             variant="outlined"
             className="mt-2"
             value={createOrUpdateContact.city}
-            onChange={item => {
-              return handleOnChange("city", item);
-            }}
             inputRef={cityRef}
-            error={getErrorStatus("city")}
+            {...register("city", { onChange: item => handleOnChange("city", item), required: true })}
+            error={Boolean(errors && errors.city)}
           />
 
           <TextField
@@ -206,32 +203,63 @@ export const CreatingMemoryCard = () => {
             variant="outlined"
             className="mt-2"
             value={createOrUpdateContact.country}
-            onChange={item => {
-              return handleOnChange("country", item);
-            }}
             inputRef={countryRef}
-            error={getErrorStatus("country")}
+            {...register("country", { onChange: item => handleOnChange("country", item), required: true })}
+            error={Boolean(errors && errors.country)}
           />
 
           <TextField
             fullWidth
             id="outlined-basic"
-            label="Postal"
+            label="Postal Code"
             variant="outlined"
             className="mt-2"
-            value={createOrUpdateContact.country}
-            onChange={item => {
-              return handleOnChange("postal", item);
+            value={createOrUpdateContact.postalCode}
+            inputRef={postalCodeRef}
+            {...register("postalCode", { onChange: item => handleOnChange("postalCode", item), required: true, pattern: /^[0-9]+$/i })}
+            error={Boolean(errors && errors.postalCode)}
+            {...{inputProps:{maxLength:6}}}
+          />
+
+          <MuiPhoneNumber
+            id="outlined-basic"
+            fullWidth
+            InputProps={{
+              className: `mt-3`,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Phone />
+                </InputAdornment>
+              ),
             }}
-            inputRef={countryRef}
-            error={getErrorStatus("postal")}
+            placeholder="Phone Number"
+            variant="outlined"
+            disableCountryCode={true}
+            type="text"
+            autoComplete="new-password"
+            name={createOrUpdateContact.phoneNumber}
+            countryCodeEditable={true}
+            defaultCountry="in"
+            onlyCountries={['in']}
+            value={createOrUpdateContact.phoneNumber}
+            ref={phoneNumberRef}
+            onChange={(phone) => setCreateOrUpdateContact({
+              ...createOrUpdateContact,
+              phoneNumber: phone.toString()
+            })}
+            onBlur={phone_Number_Check}
+            error={Boolean(phoneError)}
+            helperText= {phoneError &&
+              <Box style={{ marginLeft: '-1rem', fontSize: '13px', color: 'red' }} component="span">
+                *Phone Number is rquired.
+              </Box>
+            }
           />
           <input type="file" className="mt-3" onChange={handleUploadFile}/>
           <hr className="ms-2 me-2"/>
           <CardActions sx={{display:"flex", flexDirection:"column"}}>
             <Button variant="contained" type="submit" fullWidth>Submit</Button>
             <Button variant="contained" fullWidth className={`mt-2 ${styles.clearButton}`} onClick={()=> {
-              setIsAnyFieldEmpty(false);
               setErrorKey([]);
               return setCreateOrUpdateContact(initialState);
             }}> Clear</Button>
@@ -242,4 +270,4 @@ export const CreatingMemoryCard = () => {
   );
 }
 
-export default CreatingMemoryCard;
+export default ModifyOrCreateContact;
