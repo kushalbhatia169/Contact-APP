@@ -19,3 +19,6 @@ export const deleteContact = (id: number) => axios.delete(`${url}/${id}`);
 
 // Function to view the details of a specific contact by sending a GET request with its ID.
 export const viewContact = (id: number) => axios.get(`${url}/${id}`);
+
+//Function to generate the dummy data
+export const generateDummyData = () => axios.get(`${url}/GenerateDummyData`);

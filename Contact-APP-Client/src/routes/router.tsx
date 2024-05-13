@@ -8,6 +8,7 @@ const Router = () => {
     <BrowserRouter> {/* Wrapping the routes with BrowserRouter */}
       <Routes> {/* Defining the routes */}
         {/* Route for displaying the list of contacts */}
+        <Route path="/" element={<ListContacts />} />
         <Route path="/listContacts" element={<ListContacts />} />
         {/* Route for updating a contact, passing the contact ID as a parameter */}
         <Route path="/updateContact/:id" element={<ModifyOrCreateContact />} />

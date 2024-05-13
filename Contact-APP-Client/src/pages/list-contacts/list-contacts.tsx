@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'; // Importing useEffect and useState hooks from React
-import { getContacts } from "../../actions/contacts"; // Importing getContacts action
+import { generateDummyData, getContacts } from "../../actions/contacts"; // Importing getContacts action
 import useStore from '../../store/useStore'; // Importing custom hook for accessing store
 import TableComponent from '../../components/table-component'; // Importing TableComponent component
-import { Box, CircularProgress } from '@mui/material'; // Importing Box and CircularProgress components from Material-UI
+import { Box, Button, CircularProgress } from '@mui/material'; // Importing Box and CircularProgress components from Material-UI
 import { Link } from 'react-router-dom'; // Importing Link component from React Router
 import styles from "./list-contacts.module.css"; // Importing CSS module for styling
 
@@ -25,9 +25,12 @@ const ListContacts = () => {
   console.log(state);
 
   return (
-    <div>
-      {/* Link to navigate to create contact page */}
-      <Link className={styles.linkButton} to={{ pathname: "/createContact" }}>Create Contact</Link>
+    <div className='mt-5'>
+      <Box className="d-flex">
+        {/* Link to navigate to create contact page */}
+        <Link className={styles.linkButton} to={{ pathname: "/createContact" }}>Create Contact</Link>
+        <Button variant="outlined" color="secondary" className={`${styles.linkButton} ms-2`} onClick={() => {generateDummyData(dispatch)}}>Generate Dummy Data</Button>
+      </Box>
       {/* Conditional rendering based on loading state */}
       {isLoading ? <CircularProgress /> : 
         <Box className={styles.boxClass}>

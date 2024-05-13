@@ -367,7 +367,7 @@ export const ModifyOrCreateContact = () => {
               onlyCountries={['in']}
               value={createOrUpdateContact.phoneNumber}
               ref={phoneNumberRef}
-              inputRef={phoneNumberRef}
+              // inputRef={phoneNumberRef}
               onChange={(phone) => setCreateOrUpdateContact({
                 ...createOrUpdateContact,
                 phoneNumber: phone.toString()

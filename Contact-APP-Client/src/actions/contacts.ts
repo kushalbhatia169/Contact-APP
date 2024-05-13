@@ -72,3 +72,15 @@ export const viewData = async (id: number) => {
     return false; // Returning false in case of an error
   }
 };
+
+//Generate Dummy Data if required
+export const generateDummyData = async(dispatch: React.Dispatch<Action>) => {
+ try {
+    const {data} = await api.generateDummyData();
+    dispatch({ type: FETCH_ALL, payload: data }); 
+    window.location.reload();
+    return data || false;
+ } catch (error) {
+  return false;
+ }
+}
