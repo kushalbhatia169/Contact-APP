@@ -16,5 +16,8 @@ public interface IContactService
 
     // Method to delete a contact by ID
     void DeleteContact(int id);
+
+    //Method to generate dummy data
+    void GenerateDummyContact();
 }
 

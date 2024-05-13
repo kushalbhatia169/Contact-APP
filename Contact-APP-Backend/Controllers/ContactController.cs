@@ -30,6 +30,14 @@ namespace Contact_APP_Backend.Controllers
             return _contactService.GetAllContacts(); // Calling service to get all contacts
         }
 
+        //Get Endpoint to Generate Dummy Data
+        [HttpGet("GenerateDummyData", Name = "GenerateDummyData")]
+        public IEnumerable<ContactSchema> GenerateDummyConent()
+        {
+            _contactService.GenerateDummyContact();
+            return _contactService.GetAllContacts();
+        }
+
         // GET endpoint to retrieve a contact by ID
         [HttpGet("{id}")]
         public IActionResult GetContactById(int id)

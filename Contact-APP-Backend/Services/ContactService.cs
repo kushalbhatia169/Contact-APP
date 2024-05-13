@@ -43,6 +43,35 @@ namespace Contact_APP_Backend.Services
             _context.SaveChanges(); // Saving changes to the database
         }
 
+        public void GenerateDummyContact()
+        {
+            // Check if the number of contacts is less than 5
+            if (_context.Contacts.Count() < 5)
+            {
+                // Generate 10 dummy data
+                for (int i = 0; i < 10; i++)
+                {
+                    var dummyContact = new ContactSchema
+                    {
+                        // Generate dummy values for contact properties
+                        // Replace these with your own dummy data generation logic
+                        Name = "Dummy Name " + i,
+                        Email = "dummy" + i + "@example.com",
+                        Address = "Test Address",
+                        City = "Test City",
+                        Country = "Test Country",
+                        PostalCode = "123456",
+                        PhoneNumber = "0123456789"
+                        // Add other properties as needed
+                    };
+
+                    // Add the dummy contact to the context
+                    _context.Contacts.Add(dummyContact);
+                }
+            }
+            _context.SaveChanges(); // Saving changes to the database
+        }
+
         // Method to update an existing contact
         public void UpdateContact(int id, ContactSchema model)
         {
