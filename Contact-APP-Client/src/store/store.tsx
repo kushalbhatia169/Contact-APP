@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useReducer, createContext, PropsWithChildren, Dispatch } from 'react';
 import Reducer from './reducer';
-import { IModifyOrCreateContact } from '../pages/modify-or-create-contact/modify-or-create-contact';
+import { IModifyOrCreateContact } from "../types/modify-or-create-comppnent";
 
 export interface StoreInterface {
   contactsData: IModifyOrCreateContact[];

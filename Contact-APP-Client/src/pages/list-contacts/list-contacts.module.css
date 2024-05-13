@@ -1,0 +1,24 @@
+/*linkButton class is used to style the create Button link*/
+.linkButton {
+  display: flex; /* Display as flex container */
+  width: 131px; /* Set width */
+  height: 50px; /* Set height */
+  background: #4E9CAF; /* Set background color */
+  padding: 10px; /* Set padding */
+  text-align: center; /* Center-align text */
+  border-radius: 5px; /* Apply border radius */
+  color: white; /* Set text color */
+  font-weight: bold; /* Set font weight */
+  line-height: 25px; /* Set line height */
+  margin-bottom: 12px; /* Set bottom margin */
+  text-decoration: none; /* Remove default underline */
+}
+
+/*give box a responsive look*/
+@media screen and (max-width: 546px) {
+  .boxClass {
+    display: grid; /* Display as grid */
+    max-width: 700px; /* Set maximum width */
+    overflow-x: auto; /* Add horizontal scroll for overflow */
+  }
+}

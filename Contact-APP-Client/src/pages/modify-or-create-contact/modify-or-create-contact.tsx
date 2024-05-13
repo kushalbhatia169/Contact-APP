@@ -4,29 +4,22 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import TextField from '@mui/material/TextField/TextField';
 import { Box, Button, InputAdornment } from '@mui/material';
-import {useCallback, useRef, useState } from 'react';
+import {useCallback, useEffect, useRef, useState } from 'react';
 import styles from "./modify-or-create-contact.module.css";
-import axios from 'axios';
 import { convertBase64 } from '../../helpers/create-blob-from-file';
 import { useForm } from 'react-hook-form';
 import MuiPhoneNumber from 'mui-phone-number';
-import { Email, GpsFixed, Home, LocationCity, Map, Person, Phone } from '@mui/icons-material';
+import { CloseRounded, Email, GpsFixed, Home, LocationCity, Map, Person, Phone } from '@mui/icons-material';
 import FormComponentWrapper from '../../components/form-component-wrapper';
+import { useParams } from 'react-router';
+import { useNavigate } from 'react-router-dom';
+import { viewData, createContact, updateContact } from '../../actions/contacts';
+import useStore from '../../store/useStore';
+import { IModifyOrCreateContact, Params } from '../../types/modify-or-create-comppnent';
 
-export interface IModifyOrCreateContact {
-  id: string;
-  name: string;
-  pictureFile?: string | ArrayBuffer | null;
-  email: string;
-  address: string;
-  city: string;
-  country: string;
-  postalCode: string;
-  phoneNumber: string;
-}
-
+// Initial state for the contact form
 const initialState = {
-  id: "",
+  id: 0,
   name: "",
   pictureFile: "",
   email: "",
@@ -37,35 +30,47 @@ const initialState = {
   phoneNumber: ""
 }
 
+// Main component
 export const ModifyOrCreateContact = () => {
-  const [createOrUpdateContact, setCreateOrUpdateContact] = useState<IModifyOrCreateContact>(initialState),
-    {register, handleSubmit, formState: { errors } } = useForm({ reValidateMode: 'onBlur' }),
-    [phoneError, setPhoneError] = useState(false),
-    [errorKey, setErrorKey] = useState<string[]>([]),
-    nameRef = useRef<HTMLInputElement>(null),
-    emailRef =  useRef<HTMLInputElement>(null),
-    addressRef =  useRef<HTMLInputElement>(null),
-    cityRef =  useRef<HTMLInputElement>(null),
-    countryRef =  useRef<HTMLInputElement>(null),
-    postalCodeRef =  useRef<HTMLInputElement>(null),
-    phoneNumberRef =  useRef<HTMLInputElement>(null),
-    phone_Number_Check = () => {
-      if (createOrUpdateContact.phoneNumber) {
-        if (createOrUpdateContact.phoneNumber.replace(/\D+/g, '').length < 10) {
-          setPhoneError(true);
-          return false;
-        }
-      }
-      if (!createOrUpdateContact.phoneNumber) {
+  // State variables
+  const [createOrUpdateContact, setCreateOrUpdateContact] = useState<IModifyOrCreateContact>(initialState); // Store contact data
+  const {register, handleSubmit, formState: { errors } } = useForm({ reValidateMode: 'onBlur' }); // Form handling
+  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const { id } = useParams<Params>(); // Extracting ID from URL
+  const navigate = useNavigate(); // Navigation
+  const {dispatch } = useStore(); // Accessing global store
+  const [phoneError, setPhoneError] = useState(false); // Phone number error
+  const [errorKey, setErrorKey] = useState<string[]>([]); // Error keys for form fields
+  const nameRef = useRef<HTMLInputElement>(null); // Ref for name field
+  const emailRef =  useRef<HTMLInputElement>(null); // Ref for email field
+  const addressRef =  useRef<HTMLInputElement>(null); // Ref for address field
+  const cityRef =  useRef<HTMLInputElement>(null); // Ref for city field
+  const countryRef =  useRef<HTMLInputElement>(null); // Ref for country field
+  const postalCodeRef =  useRef<HTMLInputElement>(null); // Ref for postal code field
+  const phoneNumberRef =  useRef<HTMLInputElement>(null); // Ref for phone number field
+
+  // Function to check phone number validity
+  const phone_Number_Check = () => {
+    if (createOrUpdateContact.phoneNumber) {
+      if (createOrUpdateContact.phoneNumber.replace(/\D+/g, '').length < 10) {
         setPhoneError(true);
         return false;
       }
+    }
+    if (!createOrUpdateContact.phoneNumber) {
+      setPhoneError(true);
+      return false;
+    }
 
-      setPhoneError(false);
-      return true;
-    },
-    hasValidEmail = (value: string ) => /\S+@\S+\.\S+/i.test(value?.toString()),
-    handleOnChange = useCallback((keyVal: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setPhoneError(false);
+    return true;
+  };
+
+  // Function to check valid email format
+  const hasValidEmail = (value: string ) => /\S+@\S+\.\S+/i.test(value?.toString());
+
+  // Function to handle input change
+  const handleOnChange = useCallback((keyVal: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if(e?.target.value) {
       setCreateOrUpdateContact({
         ...createOrUpdateContact,
@@ -83,45 +88,69 @@ export const ModifyOrCreateContact = () => {
     }
   },[createOrUpdateContact, errorKey]);
 
+  // Effect hook to load contact data
+  useEffect(() => {
+    if(isLoading && id) {
+      viewData(parseInt(id)).then(result => {
+        if(result) {
+          setCreateOrUpdateContact(result);
+        }
+        setIsLoading(false);
+      })
+    } else {
+      setIsLoading(false);
+    }
+  }, [dispatch, isLoading, id, createOrUpdateContact]);
+
+  // Function to handle form submission
   const onSubmit = () => {
     const fieldsToCheck = ["name", "email", "address", "city", "country", "postalCode", "phoneNumber"];
     let focusRef = null;
 
     const emptyFields = fieldsToCheck.filter(field => !createOrUpdateContact[field as keyof IModifyOrCreateContact]);
-
-    if (emptyFields.length > 0 && phone_Number_Check()) {
+    console.log(emptyFields, phone_Number_Check())
+    if (emptyFields.length > 0) {
       setErrorKey(emptyFields);
       focusRef = emptyFields[0] === "name" ? nameRef :
                   emptyFields[0] === "email" ? emailRef :
                   emptyFields[0] === "address" ? addressRef : 
                   emptyFields[0] === "city" ? cityRef :
                   emptyFields[0] === "country" ?  countryRef : 
-                  emptyFields[0] === "postalCode" ? postalCodeRef : phone_Number_Check() ? phoneNumberRef : null;
+                  emptyFields[0] === "postalCode" ? postalCodeRef : !phone_Number_Check() ? phoneNumberRef : null;
     }
 
     if (focusRef) {
+      console.log(focusRef);
       focusRef?.current?.focus();
     } else {
-      axios.put("http://localhost:3000/posts/createPost", {
-        title: createOrUpdateContact[fieldsToCheck[0] as keyof IModifyOrCreateContact],
-        message: createOrUpdateContact[fieldsToCheck[1] as keyof IModifyOrCreateContact],
-        creator: createOrUpdateContact[fieldsToCheck[2] as keyof IModifyOrCreateContact],
-        tags: createOrUpdateContact[fieldsToCheck[3] as keyof IModifyOrCreateContact], 
-        selectedFile: createOrUpdateContact['pictureFile']
-      })
-      .then((res) => {
-        if(res?.status === 200) {
-          console.log(res.data.message);
-        } else {
-          throw new Error("Sorry your memory can not be saved");
-        }
-      })
-      .catch((error) => {
-        console.warn(error);
-      });
+      if(id) {
+        updateContact(createOrUpdateContact.id, createOrUpdateContact, dispatch)
+        .then((res) => {
+          if(res) {
+            console.log(res);
+             alert('🦄 Wow Contact Updated');
+          } else {
+            throw new Error("Sorry your contanct can not be updated.");
+          }
+        })
+        .catch((error) => {
+          console.warn(error);
+        });
+      } else {
+        createContact(createOrUpdateContact, dispatch).then((res) => {
+          if(res) {
+            console.log(res);
+            alert('🦄 Wow Contact Created');
+          } else {
+            alert("can not create contact");
+            throw new Error("can not create contact.")
+          }
+        })
+      }
     }
   };
 
+  // Function to handle file upload
   const handleUploadFile = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     if(event.target.files) {
       const file = event.target.files[0];
@@ -145,9 +174,16 @@ export const ModifyOrCreateContact = () => {
   }
 
   return (
-    <Card sx={{ minWidth: 500, overflowX: "auto" }}>
+    <Card sx={{ minWidth: 500, overflowX: "auto", marginTop: 10 }} className={styles.responsiveCard}>
       <CardHeader
-        title="Create a Contact"
+        action={
+          <Button onClick={() => {
+            navigate("/listContacts");
+          }}>
+            <CloseRounded/>
+          </Button>
+        }
+        title={`${id ? "Update" : "Create"} a Contact`}
       />
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -160,10 +196,9 @@ export const ModifyOrCreateContact = () => {
               className={`mt-2`}
               value={createOrUpdateContact.name}
               inputRef={nameRef}
-              {...register("name", { onChange: item => handleOnChange("name", item), required: true, maxLength: 20, pattern: /^[0-9a-zA-Z]+$/i })}
+              {...register("name", { onChange: item => handleOnChange("name", item), required: true})}
               error={Boolean(errors && errors.name)}
               {...{
-                inputProps:{ maxLength:20 },
                 InputProps: {
                   startAdornment: (
                     <InputAdornment position="start">
@@ -332,6 +367,7 @@ export const ModifyOrCreateContact = () => {
               onlyCountries={['in']}
               value={createOrUpdateContact.phoneNumber}
               ref={phoneNumberRef}
+              inputRef={phoneNumberRef}
               onChange={(phone) => setCreateOrUpdateContact({
                 ...createOrUpdateContact,
                 phoneNumber: phone.toString()

@@ -1,4 +1,13 @@
 .requiredField::before {
-    content: "*";
-    color: red;
+    content: "*"; /* Content to display before the element */
+    color: red; /* Color of the asterisk */
+}
+
+@media screen and (max-width: 540px) {
+  .responsiveCard {
+    margin-right: 20px; /* Right margin for responsive card */
+    max-width: 450px; /* Maximum width for responsive card */
+    min-width: unset !important; /* Unset minimum width to allow flexibility */
+    margin-top: 105px !important; /* Top margin for responsive card */
+  }
 }

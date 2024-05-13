@@ -1,35 +1,21 @@
-
-import { pages } from '../pages';
-import { BrowserRouter, Switch, Route, HashRouter, Redirect } from 'react-router-dom';
+import { pages } from '../pages'; // Importing pages from '../pages'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'; // Importing necessary components from react-router-dom
 
 const Router = () => {
-  return (<>
-    <BrowserRouter forceRefresh={false}>
-      <HashRouter>
-        <Switch>
-          <Route
-            exact
-            path="/"
-            render={() => {
-              return <Redirect to="/listContacts" />
-            }}
-          />
-          <Route exact path="/listContacts" component={pages["ListContacts"]} />
-          <Route exact path="/updateContact/:id" component={pages["ModifyOrCreateContact"]} />
-          <Route exact path="/createContact" component={pages["ModifyOrCreateContact"]} />
-          <Route exact path="/viewContact/:id" component={pages["ViewContact"]} />
-          <Route path="*">
-            <NoMatch />
-          </Route>
-        </Switch>
-      </HashRouter>
-    </BrowserRouter></>
+  const { ListContacts, ModifyOrCreateContact } = pages; // Destructuring ListContacts and ModifyOrCreateContact from pages
+
+  return (
+    <BrowserRouter> {/* Wrapping the routes with BrowserRouter */}
+      <Routes> {/* Defining the routes */}
+        {/* Route for displaying the list of contacts */}
+        <Route path="/listContacts" element={<ListContacts />} />
+        {/* Route for updating a contact, passing the contact ID as a parameter */}
+        <Route path="/updateContact/:id" element={<ModifyOrCreateContact />} />
+        {/* Route for creating a new contact */}
+        <Route path="/createContact" element={<ModifyOrCreateContact />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 
-const NoMatch = () => {
-  return (
-    <Redirect to="/listContacts" />
-  );
-};
 export default Router;
