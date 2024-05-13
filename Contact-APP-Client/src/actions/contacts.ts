@@ -9,8 +9,10 @@ export const getContacts = async (dispatch: React.Dispatch<Action>) => {
     const { data } = await api.fetchContacts();
 
     dispatch({ type: FETCH_ALL, payload: data });
+    return true;
   } catch (error) {
     console.log(error as unknown as Error);
+    return false;
   }
 };
 

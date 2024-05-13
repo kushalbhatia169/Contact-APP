@@ -1,10 +1,13 @@
 import './App.css';
 import Router from './routes/router';
+import Store from './store/store';
 
 const App = () => {
 
   return (
-    <Router/>
+    <Store>
+      <Router/>
+    </Store>
   )
 }
 

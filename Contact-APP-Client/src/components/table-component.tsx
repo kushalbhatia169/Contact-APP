@@ -25,9 +25,9 @@ interface TableComponentProps {
 }
 
 const columns: readonly Column[] = [
-  { id: 'id', label: 'Name', minWidth: 170 },
+  { id: 'id', label: 'ID', minWidth: 70 },
   { id: 'name', label: 'Name', minWidth: 170 },
-  { id: 'email', label: 'Email', minWidth: 170 },
+  { id: 'email', label: 'Email', minWidth: 250 },
   { id: 'address', label: 'Address', minWidth: 170 },
   { id: 'city', label: 'City', minWidth: 170 },
   { id: 'country', label: 'Country', minWidth: 170 },
@@ -42,7 +42,7 @@ export default function TableComponent(props: TableComponentProps) {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [rows, setRows] = useState(props.data);
   console.log(props.data);
-  
+
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
