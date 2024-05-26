@@ -1,13 +1,7 @@
-using Contact_APP_Backend.Enitity;
 using Contact_APP_Backend.GraphQL.Query;
 using Contact_APP_Backend.Helpers;
 using Contact_APP_Backend.Services;
 using GraphQL;
-using GraphQL.Server;
-using GraphQL.Server.Ui.Playground;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
 using GraphQL.Types;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,10 +41,10 @@ app.UseRouting();
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapGraphQL("/graphql");
+    _ = endpoints.MapGraphQL("/graphql");
 });
 
-app.UseGraphQLPlayground("/ui/playground");
+app.UseGraphQLPlayground();
 //app.UseHttpsRedirection();
 
 // app.UseCors();

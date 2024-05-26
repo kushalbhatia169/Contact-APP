@@ -6,6 +6,7 @@ namespace Contact_APP_Backend.GraphQL.Types
     {
         public ContactType()
         {
+            Name = nameof(ContactType);
             Field(a => a.Id);
             Field(a => a.Name);
             Field(a => a.Email);

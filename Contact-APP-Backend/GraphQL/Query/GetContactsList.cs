@@ -13,7 +13,16 @@ namespace Contact_APP_Backend.GraphQL.Query
             _contactService = contactService; // Initializing the _contactService field
 
             Field<ListGraphType<ContactType>>("contacts")
-                .Resolve(context => _contactService.GetAllContacts());
+                .Resolve(context =>
+                {
+                    var contacts = _contactService.GetAllContacts();
+                    if(!contacts.Any())
+                    {
+                        _contactService.GenerateDummyContact();
+                    }
+
+                    return contacts ?? _contactService.GetAllContacts();
+                });
         }
     }
 
