@@ -1,47 +1,67 @@
+using Contact_APP_Backend.Enitity;
+using Contact_APP_Backend.GraphQL.Query;
 using Contact_APP_Backend.Helpers;
 using Contact_APP_Backend.Services;
-using Microsoft.EntityFrameworkCore;
+using GraphQL;
+using GraphQL.Server;
+using GraphQL.Server.Ui.Playground;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
+using GraphQL.Types;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+// builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// builder.Services.AddEndpointsApiExplorer();
+// builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<IISServerOptions>(options =>
 {
     options.AutomaticAuthentication = false;
 });
 
-
 builder.Services.AddScoped<APIContext>();
 builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<ISchema, GetContactsDetailsSchema>();
+builder.Services.AddScoped<GetContactsList>();
+builder.Services.AddScoped<GetContactsDetailsSchema>();
+
+builder.Services.AddGraphQL(options =>
+{
+    options.AddSystemTextJson();
+    options.AddGraphTypes();
+});
+
+// Add GraphQL services
+//builder.Services.AddGraphQL(b => b
+//    .AddAutoSchema<GetContactsList>()  // schema
+//    .AddSystemTextJson());             // serializer
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    endpoints.MapGraphQL("/graphql");
+});
 
-app.UseCors();
+app.UseGraphQLPlayground("/ui/playground");
+//app.UseHttpsRedirection();
 
-app.UseHttpsRedirection();
+// app.UseCors();
 
-app.UseAuthorization();
+// app.UseAuthorization();
 
-app.UseCors(builder => builder
-     .AllowAnyOrigin()
-     .AllowAnyMethod()
-     .AllowAnyHeader());
+// app.UseCors(builder => builder
+//     .AllowAnyOrigin()
+//     .AllowAnyMethod()
+//     .AllowAnyHeader());
 
-//app.UseMvc();
-
-app.MapControllers();
+// app.MapControllers();
 
 app.Run();

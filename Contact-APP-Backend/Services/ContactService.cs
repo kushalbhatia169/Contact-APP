@@ -45,8 +45,8 @@ namespace Contact_APP_Backend.Services
 
         public void GenerateDummyContact()
         {
-            // Check if the number of contacts is less than 5
-            if (_context.Contacts.Count() < 5)
+            // Check if the number of contacts is zero
+            if (_context.Contacts.Count() == 0)
             {
                 // Generate 10 dummy data
                 for (int i = 0; i < 10; i++)
